@@ -78,7 +78,6 @@ Singleton manager for XML preview updates:
 The XMLPreviewDataHandler can be integrated with IDETracker to receive real-time updates:
 
 ```java
-// In IDETracker.startTracking()
 XMLPreviewDataHandler handler = XMLPreviewDataHandler.getInstance();
 handler.initialize(project);
 handler.onIDETrackingUpdate(iDETracking);
@@ -88,7 +87,6 @@ handler.onIDETrackingUpdate(iDETracking);
 Similar integration for eye tracking data:
 
 ```java
-// In EyeTracker
 XMLPreviewDataHandler handler = XMLPreviewDataHandler.getInstance();
 handler.onEyeTrackingUpdate(eyeTracking);
 ```
