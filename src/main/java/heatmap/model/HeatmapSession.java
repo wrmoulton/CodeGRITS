@@ -1,5 +1,7 @@
 package heatmap.model;
 
+import heatmap.sync.ZoneMapper;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -13,6 +15,7 @@ public class HeatmapSession {
     private final SessionMetadata metadata;
     private final List<VideoFrame> frames;
     private final Map<Integer, VideoFrame> frameMap; // For O(1) frame lookup by frame number
+    private ZoneMapper zoneMapper;
 
     /**
      * Constructs a HeatmapSession with the specified metadata.
@@ -23,6 +26,7 @@ public class HeatmapSession {
         this.metadata = metadata;
         this.frames = new ArrayList<>();
         this.frameMap = new HashMap<>();
+        this.zoneMapper = null;
     }
 
     /**
@@ -78,6 +82,24 @@ public class HeatmapSession {
 
     public int getFrameCount() {
         return frames.size();
+    }
+
+    /**
+     * Sets the zone mapper for this session.
+     *
+     * @param zoneMapper The zone mapper
+     */
+    public void setZoneMapper(ZoneMapper zoneMapper) {
+        this.zoneMapper = zoneMapper;
+    }
+
+    /**
+     * Gets the zone mapper for this session.
+     *
+     * @return The zone mapper, or null if not set
+     */
+    public ZoneMapper getZoneMapper() {
+        return zoneMapper;
     }
 
     @Override

@@ -11,6 +11,7 @@ public class MouseEvent {
     private final int screenX;         // Screen X coordinate
     private final int screenY;         // Screen Y coordinate
     private int frameNumber;           // Mapped frame number (set during synchronization)
+    private HeatmapZone zone;          // Assigned heatmap zone (set during synchronization)
 
     /**
      * Constructs a MouseEvent with the specified parameters.
@@ -28,6 +29,7 @@ public class MouseEvent {
         this.screenX = screenX;
         this.screenY = screenY;
         this.frameNumber = -1; // Not yet mapped
+        this.zone = null;      // Not yet assigned
     }
 
     // Getters
@@ -60,9 +62,37 @@ public class MouseEvent {
         this.frameNumber = frameNumber;
     }
 
+    /**
+     * Sets the heatmap zone for this mouse event.
+     *
+     * @param zone The heatmap zone
+     */
+    public void setZone(HeatmapZone zone) {
+        this.zone = zone;
+    }
+
+    /**
+     * Gets the heatmap zone for this mouse event.
+     *
+     * @return The heatmap zone, or null if not yet assigned
+     */
+    public HeatmapZone getZone() {
+        return zone;
+    }
+
+    /**
+     * Checks if this mouse event has been assigned a zone.
+     *
+     * @return true if zone is assigned, false otherwise
+     */
+    public boolean hasZone() {
+        return zone != null;
+    }
+
     @Override
     public String toString() {
-        return String.format("MouseEvent{id='%s', timestamp=%d, pos=(%d,%d), frame=%d}",
-                id, timestamp, screenX, screenY, frameNumber);
+        return String.format("MouseEvent{id='%s', timestamp=%d, pos=(%d,%d), frame=%d, zone=%s}",
+                id, timestamp, screenX, screenY, frameNumber,
+                zone != null ? zone.getZoneId() : "null");
     }
 }
