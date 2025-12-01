@@ -1,25 +1,28 @@
 package components.statusbar;
-import api.TrackingStatusNotifier;
 
+import api.TrackingStatusNotifier;
+import com.intellij.icons.AllIcons;
+import com.intellij.openapi.project.Project;
+import com.intellij.openapi.ui.popup.ListPopup;
 import com.intellij.openapi.wm.StatusBar;
 import com.intellij.openapi.wm.StatusBarWidget;
 import com.intellij.util.Consumer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.awt.*;
+import javax.swing.*;
 import java.awt.event.MouseEvent;
 
 /**
- * Status Bar Widget for CodeGRITS.
- * Displays the current tracking state (default = "Stopped").
+ * CodeGRITS Status Bar Widget that displays text + icons
+ * for Active, Paused, and Stopped states.
  */
-public class CodeGRITSStatusWidget implements StatusBarWidget, StatusBarWidget.TextPresentation {
+public class CodeGRITSStatusWidget implements StatusBarWidget, StatusBarWidget.MultipleTextValuesPresentation {
 
     private static final String WIDGET_ID = "CodeGRITSStatusWidget";
 
-    // Default state shown on startup
-    private String text = "CodeGRITS: Stopped";
+    private TrackingStatusNotifier.Status state = TrackingStatusNotifier.Status.STOPPED;
+    private StatusBar statusBar;
 
     @Override
     public @NotNull String ID() {
@@ -28,60 +31,67 @@ public class CodeGRITSStatusWidget implements StatusBarWidget, StatusBarWidget.T
 
     @Override
     public void install(@NotNull StatusBar statusBar) {
-        // Subscribe to tracking status changes
-        statusBar.getProject().getMessageBus().connect()
-            .subscribe(TrackingStatusNotifier.TOPIC, status -> {
-                switch (status) {
-                    case STARTED -> setState("Started");
-                    case PAUSED -> setState("Paused");
-                    case RESUMED -> setState("Resumed");
-                    case STOPPED -> setState("Stopped");
-                }
+        this.statusBar = statusBar;
 
-                // Refresh the status bar immediately
-                statusBar.updateWidget(ID());
-            });
-    }
+        Project project = statusBar.getProject();
+        if (project == null) return;
 
-
-    @Override
-    public void dispose() {
-        // Nothing to dispose yet
+        project.getMessageBus().connect().subscribe(
+                TrackingStatusNotifier.TOPIC,
+                status -> {
+                    this.state = status;
+                    statusBar.updateWidget(WIDGET_ID);
+                });
     }
 
     @Override
-    public @Nullable WidgetPresentation getPresentation() {
-        return this; // We implement TextPresentation ourselves
+    public void dispose() {}
+
+    // --- Presentation ---
+
+    @Override
+    public @NotNull String getSelectedValue() {
+        return switch (state) {
+            case STARTED, RESUMED -> "CodeGRITS: Active";
+            case PAUSED          -> "CodeGRITS: Paused";
+            case STOPPED         -> "CodeGRITS: Stopped";
+            default              -> "CodeGRITS";       // fallback, never null
+        };
     }
 
-    // ===== WidgetPresentation / TextPresentation =====
+
+
+    @Override
+    public @NotNull Icon getIcon() {
+        return switch (state) {
+            case STARTED, RESUMED -> AllIcons.General.InspectionsOK;
+            case PAUSED           -> AllIcons.Actions.Pause;
+            case STOPPED          -> AllIcons.Actions.Suspend;
+            default               -> AllIcons.General.InspectionsOK; // fallback, never null
+        };
+    }
+
+
 
     @Override
     public @Nullable String getTooltipText() {
-        return "CodeGRITS Tracking Status";
+        return getSelectedValue();
     }
 
     @Override
     public @Nullable Consumer<MouseEvent> getClickConsumer() {
-        // No click action yet – can add later
         return null;
     }
 
+    // REQUIRED BY MultipleTextValuesPresentation
     @Override
-    public @NotNull String getText() {
-        return text;
+    public @Nullable ListPopup getPopupStep() {
+        return null; // we don't show a popup
+    }
+    
+    @Override
+    public @Nullable WidgetPresentation getPresentation() {
+        return this; // NEVER return null
     }
 
-    @Override
-    public float getAlignment() {
-        return Component.CENTER_ALIGNMENT;
-    }
-
-    /**
-     * Allows other parts of the plugin (e.g., Start/Stop tracking)
-     * to update the status text.
-     */
-    public void setState(@NotNull String newState) {
-        this.text = "CodeGRITS: " + newState;
-    }
 }
