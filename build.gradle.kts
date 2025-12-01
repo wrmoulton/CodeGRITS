@@ -71,4 +71,27 @@ tasks {
         dependsOn(createOpenApiSourceJar)
         from(createOpenApiSourceJar) { into("lib/src") }
     }
+
+    register<JavaExec>("validateHeatmap") {
+        group = "heatmap"
+        description = "Validates CodeGRITS session data for heatmap generation. Usage: ./gradlew validateHeatmap -Psession=<path>"
+        
+        classpath = sourceSets["main"].runtimeClasspath
+        mainClass.set("heatmap.cli.HeatmapDataValidator")
+        
+        // Require session path via -Psession=<path>
+        val sessionPath = project.findProperty("session") as String?
+        if (sessionPath != null) {
+            args = listOf(sessionPath)
+        } else {
+            // Print usage message if no session provided
+            doFirst {
+                throw GradleException(
+                    "\nMissing required parameter.\n" +
+                    "Usage: ./gradlew validateHeatmap -Psession=<session-folder-path>\n" +
+                    "Example: ./gradlew validateHeatmap -Psession=1763167078241"
+                )
+            }
+        }
+    }
 }
