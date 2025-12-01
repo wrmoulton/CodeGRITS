@@ -1,4 +1,5 @@
 package components.statusbar;
+import api.TrackingStatusNotifier;
 
 import com.intellij.openapi.wm.StatusBar;
 import com.intellij.openapi.wm.StatusBarWidget;
@@ -27,8 +28,21 @@ public class CodeGRITSStatusWidget implements StatusBarWidget, StatusBarWidget.T
 
     @Override
     public void install(@NotNull StatusBar statusBar) {
-        // No special initialization yet
+        // Subscribe to tracking status changes
+        statusBar.getProject().getMessageBus().connect()
+            .subscribe(TrackingStatusNotifier.TOPIC, status -> {
+                switch (status) {
+                    case STARTED -> setState("Started");
+                    case PAUSED -> setState("Paused");
+                    case RESUMED -> setState("Resumed");
+                    case STOPPED -> setState("Stopped");
+                }
+
+                // Refresh the status bar immediately
+                statusBar.updateWidget(ID());
+            });
     }
+
 
     @Override
     public void dispose() {

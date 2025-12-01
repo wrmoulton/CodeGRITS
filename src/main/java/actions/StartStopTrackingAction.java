@@ -1,5 +1,7 @@
 package actions;
 
+import com.intellij.openapi.application.ApplicationManager;
+import api.TrackingStatusNotifier;
 import com.intellij.notification.Notification;
 import com.intellij.notification.NotificationType;
 import com.intellij.openapi.actionSystem.AnAction;
@@ -99,6 +101,10 @@ public class StartStopTrackingAction extends AnAction {
                 iDETracker.setProjectPath(projectPath);
                 iDETracker.setDataOutputPath(realDataOutputPath);
                 iDETracker.startTracking(e.getProject());
+                ApplicationManager.getApplication()
+                    .getMessageBus()
+                    .syncPublisher(TrackingStatusNotifier.TOPIC)
+                    .onStatusChanged(TrackingStatusNotifier.Status.STARTED);
 
                 if (config.getCheckBoxes().get(1)) {
                     eyeTracker = new EyeTracker();
@@ -116,6 +122,10 @@ public class StartStopTrackingAction extends AnAction {
             } else {
                 isTracking = false;
                 iDETracker.stopTracking();
+                ApplicationManager.getApplication()
+                    .getMessageBus()
+                    .syncPublisher(TrackingStatusNotifier.TOPIC)
+                    .onStatusChanged(TrackingStatusNotifier.Status.STOPPED);
                 AddLabelAction.setIsEnabled(false);
                 ConfigAction.setIsEnabled(true);
                 if (config.getCheckBoxes().get(1) && eyeTracker != null) {
