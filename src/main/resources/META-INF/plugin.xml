@@ -39,6 +39,7 @@
                            displayType="BALLOON"/>
                            <!-- CodeGRITS Status Bar Widget -->
         <statusBarWidgetFactory
+            id="codegrits.status.widget"
             implementation="components.statusbar.CodeGRITSStatusWidgetFactory"/>
     </extensions>
 
