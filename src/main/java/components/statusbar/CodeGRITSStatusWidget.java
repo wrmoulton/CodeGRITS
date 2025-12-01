@@ -1,22 +1,25 @@
 package components.statusbar;
-import api.TrackingStatusNotifier;
 
+import api.TrackingStatusNotifier;
+import com.intellij.icons.AllIcons;
+import com.intellij.openapi.project.Project;
+import com.intellij.openapi.ui.popup.ListPopup;
 import com.intellij.openapi.wm.StatusBar;
 import com.intellij.openapi.wm.StatusBarWidget;
 import com.intellij.util.Consumer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.awt.*;
+import javax.swing.*;
 import java.awt.event.MouseEvent;
 import javax.swing.Timer;
 import java.awt.event.ActionEvent; 
 
 /**
- * Status Bar Widget for CodeGRITS.
- * Displays the current tracking state (default = "Stopped").
+ * CodeGRITS Status Bar Widget that displays text + icons
+ * for Active, Paused, and Stopped states.
  */
-public class CodeGRITSStatusWidget implements StatusBarWidget, StatusBarWidget.TextPresentation {
+public class CodeGRITSStatusWidget implements StatusBarWidget, StatusBarWidget.MultipleTextValuesPresentation {
 
     private static final String WIDGET_ID = "CodeGRITSStatusWidget";
 
@@ -66,39 +69,36 @@ public class CodeGRITSStatusWidget implements StatusBarWidget, StatusBarWidget.T
 
 
     @Override
-    public @Nullable WidgetPresentation getPresentation() {
-        return this; // We implement TextPresentation ourselves
+    public @NotNull Icon getIcon() {
+        return switch (state) {
+            case STARTED, RESUMED -> AllIcons.General.InspectionsOK;
+            case PAUSED           -> AllIcons.Actions.Pause;
+            case STOPPED          -> AllIcons.Actions.Suspend;
+            default               -> AllIcons.General.InspectionsOK;
+        };
     }
 
-    // ===== WidgetPresentation / TextPresentation =====
+
 
     @Override
     public @Nullable String getTooltipText() {
-        return "CodeGRITS Tracking Status";
+        return getSelectedValue();
     }
 
     @Override
     public @Nullable Consumer<MouseEvent> getClickConsumer() {
-        // No click action yet – can add later
         return null;
     }
 
+    // REQUIRED BY MultipleTextValuesPresentation
     @Override
-    public @NotNull String getText() {
-        return text;
+    public @Nullable ListPopup getPopupStep() {
+        return null; // we don't show a popup
     }
-
+    
     @Override
-    public float getAlignment() {
-        return Component.CENTER_ALIGNMENT;
-    }
-
-    /**
-     * Allows other parts of the plugin (e.g., Start/Stop tracking)
-     * to update the status text.
-     */
-    public void setState(@NotNull String newState) {
-        this.text = "CodeGRITS: " + newState;
+    public @Nullable WidgetPresentation getPresentation() {
+        return this; // NEVER return null
     }
     // --- Timer helpers ---
 
