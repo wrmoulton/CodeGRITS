@@ -1,10 +1,10 @@
 # In-IDE XML Preview Feature for CodeGRITS
 
-## 🎯 Summary
+## Summary
 
 The **In-IDE XML Preview** feature has been successfully implemented for CodeGRITS. This feature provides researchers with an integrated interface to view, analyze, and explore XML output generated during tracking sessions—all without leaving the IDE.
 
-## 📦 What's Included
+## What's Included
 
 ### Core Components (7 Java Classes)
 
@@ -54,32 +54,6 @@ See `XML_PREVIEW_INTEGRATION_EXAMPLES.java` for:
 - Batch XML processing
 - Custom visualization examples
 
-## 📋 File Structure
-
-```
-CodeGRITS/
-├── src/main/java/
-│   ├── components/
-│   │   ├── XMLPreviewPanel.java          (Core preview component)
-│   │   ├── XMLPreviewWindow.java         (Dialog with tabs)
-│   │   ├── XMLFilePreviewPanel.java      (File browser panel)
-│   │   └── XMLStatusWidget.java          (Status bar widget)
-│   ├── actions/
-│   │   └── XMLPreviewAction.java         (Menu action)
-│   ├── api/
-│   │   └── XMLPreviewDataHandler.java    (Data manager)
-│   └── utils/
-│       └── XMLValidator.java             (XML utilities)
-├── src/main/resources/META-INF/
-│   └── plugin.xml                        (Modified - added action)
-├── XML_PREVIEW_FEATURE.md                (📘 Technical docs)
-├── XML_PREVIEW_QUICK_START.md            (📘 User guide)
-├── XML_PREVIEW_INTEGRATION_EXAMPLES.java (📘 Code examples)
-├── XML_PREVIEW_IMPLEMENTATION_SUMMARY.md (📘 Implementation details)
-└── README.md                              (This file)
-```
-
-## 🔑 Key Features
 
 ### ✨ User-Facing Features
 - ✅ In-IDE XML viewer with syntax highlighting
@@ -99,15 +73,6 @@ CodeGRITS/
 - ✅ Error handling and validation
 
 ## 📖 Documentation
-
-| Document | Purpose | Audience |
-|----------|---------|----------|
-| **XML_PREVIEW_FEATURE.md** | Technical architecture and API | Developers |
-| **XML_PREVIEW_QUICK_START.md** | Step-by-step usage guide | Users & Researchers |
-| **XML_PREVIEW_INTEGRATION_EXAMPLES.java** | Code examples | Developers |
-| **XML_PREVIEW_IMPLEMENTATION_SUMMARY.md** | Implementation details | Developers |
-
-## 🔧 Integration Points
 
 ### With IDETracker
 ```java
