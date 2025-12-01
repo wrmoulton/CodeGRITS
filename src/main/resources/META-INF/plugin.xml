@@ -37,6 +37,9 @@
         <projectService serviceImplementation="api.RealtimeDataImpl"/>
         <notificationGroup id="CodeGRITS Notification Group"
                            displayType="BALLOON"/>
+                           <!-- CodeGRITS Status Bar Widget -->
+        <statusBarWidgetFactory
+            implementation="components.statusbar.CodeGRITSStatusWidgetFactory"/>
     </extensions>
 
     <actions>
