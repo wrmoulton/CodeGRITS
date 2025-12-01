@@ -1,5 +1,7 @@
 package actions;
 
+import com.intellij.openapi.application.ApplicationManager;
+import api.TrackingStatusNotifier;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import org.jetbrains.annotations.NotNull;
@@ -45,6 +47,10 @@ public class PauseResumeTrackingAction extends AnAction {
             StartStopTrackingAction.resumeTracking();
             AddLabelAction.setIsEnabled(true);
             ConfigAction.setIsEnabled(false);
+            ApplicationManager.getApplication()
+                .getMessageBus()
+                .syncPublisher(TrackingStatusNotifier.TOPIC)
+                .onStatusChanged(TrackingStatusNotifier.Status.RESUMED);
 
         } else {
             StartStopTrackingAction.pauseTracking();
@@ -55,6 +61,10 @@ public class PauseResumeTrackingAction extends AnAction {
             } catch (IOException ex) {
                 throw new RuntimeException(ex);
             }
+            ApplicationManager.getApplication()
+                .getMessageBus()
+                .syncPublisher(TrackingStatusNotifier.TOPIC)
+                .onStatusChanged(TrackingStatusNotifier.Status.PAUSED);
         }
     }
 }
