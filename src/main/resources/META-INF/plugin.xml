@@ -59,6 +59,10 @@
                 description="Configure tracking options">
             <add-to-group group-id="ToolsMenu" anchor="after" relative-to-action="CodeGRITS.PauseResumeTracking"/>
         </action>
+        <action id="CodeGRITS.XMLPreview" class="actions.XMLPreviewAction" text="XML Preview"
+                description="Preview CodeGRITS XML output">
+            <add-to-group group-id="ToolsMenu" anchor="after" relative-to-action="CodeGRITS.Config"/>
+        </action>
         <group id="CodeGRITS.AddLabelActionGroup" class="actions.AddLabelActionGroup" text="Add Label"
                description="Add label" popup="true" icon="AllIcons.Actions.Edit">
             <add-to-group group-id="EditorPopupMenu" anchor="first"/>
