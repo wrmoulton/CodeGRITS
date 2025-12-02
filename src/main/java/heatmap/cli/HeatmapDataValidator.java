@@ -2,9 +2,13 @@ package heatmap.cli;
 
 import heatmap.model.*;
 import heatmap.parser.*;
+import heatmap.sync.TimeWindowSynchronizer;
+import heatmap.sync.ZoneMapper;
 import heatmap.validator.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Command-line tool for validating and testing CodeGRITS session data.
@@ -21,6 +25,7 @@ public class HeatmapDataValidator {
         }
 
         String sessionPath = args[0];
+
         System.out.println("╔════════════════════════════════════════════════════════════╗");
         System.out.println("║      CodeGRITS Heatmap Data Validator v1.0                 ║");
         System.out.println("╚════════════════════════════════════════════════════════════╝");
@@ -109,8 +114,8 @@ public class HeatmapDataValidator {
             }
 
             // 5. Synchronize data
-            System.out.println("\n[5/5] Synchronizing mouse events to frames...");
-            DataSynchronizer synchronizer = new DataSynchronizer();
+            System.out.println("\n[5/5] Synchronizing mouse events to frames and assigning zones...");
+            TimeWindowSynchronizer synchronizer = new TimeWindowSynchronizer();
             HeatmapSession session = synchronizer.synchronize(metadata, frames, mouseEvents);
 
             // Print statistics
@@ -126,6 +131,64 @@ public class HeatmapDataValidator {
             if (session.getActiveFrameCount() > 0) {
                 double avgEvents = (double) session.getTotalMouseEvents() / session.getActiveFrameCount();
                 System.out.println("Avg events per active frame: " + String.format("%.1f", avgEvents));
+            }
+
+            // Zone Analysis
+            System.out.println("\n╔════════════════════════════════════════════════════════════╗");
+            System.out.println("║                    Zone Analysis                           ║");
+            System.out.println("╚════════════════════════════════════════════════════════════╝");
+            System.out.println();
+
+            ZoneMapper zoneMapper = session.getZoneMapper();
+            if (zoneMapper != null) {
+                System.out.println("Grid configuration:");
+                System.out.println("  Grid size: " + ZoneMapper.getGridSize() + "x" + ZoneMapper.getGridSize() +
+                                  " (" + (ZoneMapper.getGridSize() * ZoneMapper.getGridSize()) + " total zones)");
+                System.out.println("  Cell size: " + zoneMapper.getCellWidth() + "x" +
+                                  zoneMapper.getCellHeight() + " pixels");
+                System.out.println("  Screen: " + metadata.getScreenSize().width + "x" +
+                                  metadata.getScreenSize().height);
+
+                // Count events per zone
+                Map<Integer, Integer> zoneEventCounts = new HashMap<>();
+                int mappedEvents = 0;
+                for (VideoFrame frame : session.getFrames()) {
+                    for (MouseEvent event : frame.getMouseEvents()) {
+                        if (event.hasZone()) {
+                            mappedEvents++;
+                            int zoneId = event.getZone().getZoneId();
+                            zoneEventCounts.put(zoneId, zoneEventCounts.getOrDefault(zoneId, 0) + 1);
+                        }
+                    }
+                }
+
+                System.out.println("\nEvent distribution:");
+                System.out.println("  Events mapped to zones: " + mappedEvents + " / " +
+                                  session.getTotalMouseEvents());
+                System.out.println("  Unique zones with activity: " + zoneEventCounts.size() +
+                                  " / " + (ZoneMapper.getGridSize() * ZoneMapper.getGridSize()));
+
+                // Show top 5 hottest zones
+                if (!zoneEventCounts.isEmpty()) {
+                    System.out.println("\nTop 5 hottest zones:");
+                    zoneEventCounts.entrySet().stream()
+                            .sorted(Map.Entry.<Integer, Integer>comparingByValue().reversed())
+                            .limit(5)
+                            .forEach(entry -> {
+                                int zoneId = entry.getKey();
+                                int count = entry.getValue();
+                                int gridX = zoneId % ZoneMapper.getGridSize();
+                                int gridY = zoneId / ZoneMapper.getGridSize();
+                                System.out.printf("  Zone %3d (grid %2d,%2d): %4d events\n",
+                                                 zoneId, gridX, gridY, count);
+                            });
+                    
+                    // Detailed count grid
+                    System.out.println("\nDetailed Event Counts per Zone:");
+                    printCountGrid(zoneEventCounts);
+                }
+            } else {
+                System.out.println("⚠ Zone mapper not initialized");
             }
 
             // Show sample mapping
@@ -159,5 +222,70 @@ public class HeatmapDataValidator {
             e.printStackTrace();
             System.exit(1);
         }
+    }
+
+    /**
+     * Prints a detailed grid showing the exact event count for each zone.
+     * Numbers are right-aligned for easy reading.
+     *
+     * @param zoneEventCounts Map of zone IDs to event counts
+     */
+    private static void printCountGrid(Map<Integer, Integer> zoneEventCounts) {
+        int gridSize = ZoneMapper.getGridSize();
+        
+        // Find max count to determine column width
+        int maxCount = zoneEventCounts.values().stream()
+                .max(Integer::compareTo)
+                .orElse(0);
+        int columnWidth = Math.max(3, String.valueOf(maxCount).length());
+        
+        // Print column header (X coordinates)
+        System.out.print("     ");  // Space for row numbers
+        for (int x = 0; x < gridSize; x++) {
+            System.out.printf("%" + columnWidth + "d ", x);
+        }
+        System.out.println();
+        
+        // Print top border
+        System.out.print("   ┌");
+        for (int x = 0; x < gridSize; x++) {
+            for (int i = 0; i < columnWidth; i++) {
+                System.out.print("─");
+            }
+            if (x < gridSize - 1) {
+                System.out.print("─");
+            }
+        }
+        System.out.println("┐");
+
+        // Print grid with counts
+        for (int y = 0; y < gridSize; y++) {
+            System.out.printf("%2d │", y);  // Row number
+            for (int x = 0; x < gridSize; x++) {
+                int zoneId = y * gridSize + x;
+                int count = zoneEventCounts.getOrDefault(zoneId, 0);
+                
+                if (count == 0) {
+                    // Print dash for empty zones
+                    System.out.printf("%" + columnWidth + "s ", "-");
+                } else {
+                    // Print count
+                    System.out.printf("%" + columnWidth + "d ", count);
+                }
+            }
+            System.out.println("│");
+        }
+
+        // Print bottom border
+        System.out.print("   └");
+        for (int x = 0; x < gridSize; x++) {
+            for (int i = 0; i < columnWidth; i++) {
+                System.out.print("─");
+            }
+            if (x < gridSize - 1) {
+                System.out.print("─");
+            }
+        }
+        System.out.println("┘");
     }
 }
