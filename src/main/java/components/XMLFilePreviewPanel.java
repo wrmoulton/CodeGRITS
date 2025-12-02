@@ -43,24 +43,6 @@ public class XMLFilePreviewPanel extends JPanel {
         add(previewPanel, BorderLayout.CENTER);
     }
 
-    /**
-     * Open a file browser dialog to select an XML file.
-     */
-    private void browseXMLFile() {
-        FileChooserDescriptor descriptor = new FileChooserDescriptor(true, false, false, false, false, false) {
-            @Override
-            public boolean isFileVisible(VirtualFile file, boolean showHiddenFiles) {
-                return file.isDirectory() || file.getName().endsWith(".xml");
-            }
-        };
-        descriptor.setTitle("Select XML File");
-        descriptor.setDescription("Choose an XML file to preview");
-
-        VirtualFile selected = FileChooser.chooseFile(descriptor, project, null);
-        if (selected != null && !selected.isDirectory()) {
-            loadXMLFile(selected.getPath());
-        }
-    }
 
     /**
      * Load and display an XML file.
@@ -99,8 +81,26 @@ public class XMLFilePreviewPanel extends JPanel {
     }
 }
 
+ /**
+     * Open a file browser dialog to select an XML file.
+     */
+    private void browseXMLFile() {
+        FileChooserDescriptor descriptor = new FileChooserDescriptor(true, false, false, false, false, false) {
+            @Override
+            public boolean isFileVisible(VirtualFile file, boolean showHiddenFiles) {
+                return file.isDirectory() || file.getName().endsWith(".xml");
+            }
+        };
+        descriptor.setTitle("Select XML File");
+        descriptor.setDescription("Choose an XML file to preview");
 
+        VirtualFile selected = FileChooser.chooseFile(descriptor, project, null);
+        if (selected != null && !selected.isDirectory()) {
+            loadXMLFile(selected.getPath());
+        }
+    }
 
+    
 /**
  * INTEGRATION EXAMPLES FOR XML PREVIEW FEATURE
  * 
