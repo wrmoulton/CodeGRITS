@@ -4,8 +4,8 @@ package heatmap.generator;
  * Configuration constants for heatmap generation.
  */
 public class HeatmapConfiguration {
-    // Time window for event aggregation (30 seconds in milliseconds)
-    public static final long TIME_WINDOW_MS = 30000;
+    // Time window for event aggregation (10 seconds in milliseconds)
+    public static final long TIME_WINDOW_MS = 10000;
     
     // Intensity calculation method
     public enum ScalingMethod {
