@@ -72,7 +72,30 @@ tasks {
         from(createOpenApiSourceJar) { into("lib/src") }
     }
 
-    register<JavaExec>("validateHeatmap") {
+    // register<JavaExec>("validateHeatmap") {
+    //     group = "heatmap"
+    //     description = "Validates CodeGRITS session data for heatmap generation. Usage: ./gradlew validateHeatmap -Psession=<path>"
+        
+    //     classpath = sourceSets["main"].runtimeClasspath
+    //     mainClass.set("heatmap.cli.HeatmapDataValidator")
+        
+    //     // Require session path via -Psession=<path>
+    //     val sessionPath = project.findProperty("session") as String?
+    //     if (sessionPath != null) {
+    //         args = listOf(sessionPath)
+    //     } else {
+    //         // Print usage message if no session provided
+    //         doFirst {
+    //             throw GradleException(
+    //                 "\nMissing required parameter.\n" +
+    //                 "Usage: ./gradlew validateHeatmap -Psession=<session-folder-path>\n" +
+    //                 "Example: ./gradlew validateHeatmap -Psession=1763167078241"
+    //             )
+    //         }
+    //     }
+    // }
+
+	register<JavaExec>("validateHeatmap") {
         group = "heatmap"
         description = "Validates CodeGRITS session data for heatmap generation. Usage: ./gradlew validateHeatmap -Psession=<path>"
         
@@ -84,13 +107,26 @@ tasks {
         if (sessionPath != null) {
             args = listOf(sessionPath)
         } else {
-            // Print usage message if no session provided
             doFirst {
-                throw GradleException(
-                    "\nMissing required parameter.\n" +
-                    "Usage: ./gradlew validateHeatmap -Psession=<session-folder-path>\n" +
-                    "Example: ./gradlew validateHeatmap -Psession=1763167078241"
-                )
+                throw GradleException("Session path required. Usage: ./gradlew validateHeatmap -Psession=<path>")
+            }
+        }
+    }
+
+    register<JavaExec>("generateHeatmaps") {
+        group = "heatmap"
+        description = "Generates heatmap overlay images for a session. Usage: ./gradlew generateHeatmaps -Psession=<path>"
+        
+        classpath = sourceSets["main"].runtimeClasspath
+        mainClass.set("heatmap.cli.GenerateHeatmaps")
+        
+        // Require session path via -Psession=<path>
+        val sessionPath = project.findProperty("session") as String?
+        if (sessionPath != null) {
+            args = listOf(sessionPath)
+        } else {
+            doFirst {
+                throw GradleException("Session path required. Usage: ./gradlew generateHeatmaps -Psession=<path>")
             }
         }
     }
